@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <title>深海 - 终极控制版</title>
+    <title>深海 - 终极全控版</title>
     <style>
         /* --- 基础样式 --- */
         body {
@@ -46,84 +46,124 @@
             font-size: 20px;
             z-index: 100;
             cursor: pointer;
-            transition: transform 0.3s ease, background 0.3s;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
         }
-        #toggle-btn:active {
-            transform: scale(0.9);
-            background: rgba(255, 255, 255, 0.2);
-        }
+        #toggle-btn:active { transform: scale(0.9); }
 
-        /* --- 折叠面板 --- */
+        /* --- 超级控制面板 --- */
         #settings-panel {
             position: absolute;
             top: 80px;
             right: 20px;
-            width: 300px;
-            max-height: 80vh; /* 防止太长超出屏幕 */
+            width: 320px; /* 加宽以容纳更多内容 */
+            max-height: 85vh; /* 允许滚动 */
             overflow-y: auto;
-            background: rgba(10, 15, 20, 0.85);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(8, 12, 16, 0.92); /* 加深背景 */
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.15);
             border-radius: 12px;
-            padding: 20px;
+            padding: 15px;
             color: #eee;
             z-index: 99;
             transform-origin: top right;
-            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
             opacity: 0;
-            transform: scale(0.9) translateY(-20px);
-            pointer-events: none; /* 隐藏时不挡点击 */
+            transform: scale(0.95) translateY(-20px);
+            pointer-events: none;
+            /* 滚动条样式 */
+            scrollbar-width: thin;
+            scrollbar-color: #00ccff rgba(0,0,0,0.3);
+        }
+        #settings-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+        #settings-panel::-webkit-scrollbar-thumb {
+            background-color: #00ccff;
+            border-radius: 3px;
         }
         
-        /* 展开状态 */
         #settings-panel.active {
             opacity: 1;
             transform: scale(1) translateY(0);
             pointer-events: auto;
         }
 
-        /* 面板内部组件 */
         .panel-section {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             padding-bottom: 15px;
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .panel-section:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-        }
         .section-title {
-            font-size: 14px;
-            font-weight: 600;
+            font-size: 13px;
+            font-weight: 700;
             color: #00ccff;
             margin-bottom: 10px;
+            text-transform: uppercase;
             letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+        }
+        .section-title::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 12px;
+            background: #00ccff;
+            margin-right: 8px;
+            border-radius: 2px;
         }
         
+        /* 模式切换按钮组 */
+        .mode-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .mode-btn {
+            flex: 1;
+            padding: 10px;
+            font-size: 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #aaa;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .mode-btn.active {
+            background: rgba(0, 204, 255, 0.25);
+            border-color: #00ccff;
+            color: #fff;
+            box-shadow: 0 0 12px rgba(0,204,255,0.2);
+            font-weight: bold;
+        }
+
+        .clear-btn {
+            width: 100%;
+            padding: 8px;
+            background: rgba(255, 60, 60, 0.15);
+            border: 1px solid rgba(255, 60, 60, 0.3);
+            color: #ffcccc;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        .clear-btn:active { background: rgba(255, 60, 60, 0.3); }
+
         .control-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
             margin-bottom: 12px;
         }
-        .control-label {
-            font-size: 12px;
-            color: #aaa;
-            flex: 1;
-        }
-        .control-value {
-            font-size: 12px;
-            color: #fff;
-            width: 30px;
-            text-align: right;
-            margin-left: 8px;
-        }
-
-        /* 滑块样式 */
+        .control-label { font-size: 12px; color: #ccc; flex: 1; }
+        
         input[type="range"] {
             -webkit-appearance: none;
-            width: 50%;
+            width: 55%;
             height: 4px;
             background: rgba(255,255,255,0.1);
             border-radius: 2px;
@@ -133,18 +173,12 @@
             -webkit-appearance: none;
             width: 16px;
             height: 16px;
-            background: #fff;
+            background: #eee;
             border-radius: 50%;
             cursor: pointer;
-            box-shadow: 0 0 10px rgba(255,255,255,0.5);
-            margin-top: -6px; /* 居中 */
+            margin-top: -6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
         }
-        input[type="range"]::-webkit-slider-runnable-track {
-            height: 4px;
-            background: transparent;
-        }
-
-        /* 颜色选择器 */
         input[type="color"] {
             -webkit-appearance: none;
             border: none;
@@ -152,22 +186,13 @@
             height: 24px;
             background: none;
             cursor: pointer;
-            padding: 0;
-        }
-        input[type="color"]::-webkit-color-swatch-wrapper {
-            padding: 0; 
-        }
-        input[type="color"]::-webkit-color-swatch {
-            border: 1px solid rgba(255,255,255,0.3);
-            border-radius: 4px;
         }
 
-        /* Loading */
         #loader {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            color: rgba(255,255,255,0.4);
+            color: rgba(255,255,255,0.5);
             font-size: 12px;
             pointer-events: none;
             transition: opacity 1s;
@@ -176,120 +201,130 @@
 </head>
 <body>
 
-    <!-- 1. 切换按钮 -->
     <div id="toggle-btn">⚙️</div>
 
-    <!-- 2. 设置面板 -->
     <div id="settings-panel">
-        
-        <!-- 主灯设置 -->
+        <!-- 1. 交互与模式 -->
+        <div class="panel-section">
+            <div class="section-title">交互模式</div>
+            <div class="mode-group">
+                <div class="mode-btn active" onclick="setMode('ripple')" id="btn-ripple">🌊 纯净涟漪</div>
+                <div class="mode-btn" onclick="setMode('confetti')" id="btn-confetti">🎉 撒彩带</div>
+            </div>
+            <button class="clear-btn" onclick="clearFloatingItems()">🧹 清除所有漂浮物</button>
+        </div>
+
+        <!-- 2. 主灯光 -->
         <div class="panel-section">
             <div class="section-title">主光源 (Main Light)</div>
             <div class="control-row">
-                <span class="control-label">水平位置</span>
+                <span class="control-label">水平位置 X</span>
                 <input type="range" id="main-x" min="-100" max="100" value="20">
             </div>
             <div class="control-row">
-                <span class="control-label">垂直高度</span>
-                <input type="range" id="main-y" min="10" max="100" value="40">
+                <span class="control-label">垂直高度 Y</span>
+                <input type="range" id="main-y" min="5" max="100" value="40">
             </div>
             <div class="control-row">
-                <span class="control-label">亮度</span>
+                <span class="control-label">光照强度</span>
                 <input type="range" id="main-int" min="0" max="3" step="0.1" value="1.0">
             </div>
         </div>
 
-        <!-- 副灯设置 -->
+        <!-- 3. 副灯光 (找回来了!) -->
         <div class="panel-section">
-            <div class="section-title">副灯 (Point Light)</div>
+            <div class="section-title">点光源 (Point Light)</div>
             <div class="control-row">
-                <span class="control-label">中心偏移</span>
-                <input type="range" id="point-x" min="-50" max="50" value="0">
+                <span class="control-label">水平偏移 X</span>
+                <input type="range" id="point-x" min="-60" max="60" value="0">
             </div>
             <div class="control-row">
-                <span class="control-label">悬浮高度</span>
-                <input type="range" id="point-y" min="5" max="60" value="20">
+                <span class="control-label">悬浮高度 Y</span>
+                <input type="range" id="point-y" min="5" max="80" value="20">
             </div>
             <div class="control-row">
-                <span class="control-label">亮度</span>
+                <span class="control-label">光照强度</span>
                 <input type="range" id="point-int" min="0" max="2" step="0.1" value="0.6">
             </div>
         </div>
 
-        <!-- 水面设置 -->
+        <!-- 4. 环境与物理 -->
         <div class="panel-section">
-            <div class="section-title">水面属性 (Water)</div>
+            <div class="section-title">环境与水体</div>
+            <div class="control-row">
+                <span class="control-label">环境光亮度</span>
+                <input type="range" id="ambient-int" min="0" max="1.5" step="0.1" value="0.6">
+            </div>
             <div class="control-row">
                 <span class="control-label">水体颜色</span>
                 <input type="color" id="water-color" value="#004466">
             </div>
             <div class="control-row">
-                <span class="control-label">涟漪力度</span>
+                <span class="control-label">涟漪扩散力度</span>
                 <input type="range" id="ripple-str" min="1" max="10" step="0.5" value="5">
             </div>
             <div class="control-row">
-                <span class="control-label">环境底光</span>
-                <input type="range" id="ambient-int" min="0" max="1.5" step="0.1" value="0.6">
+                <span class="control-label">视野缩放 (Zoom)</span>
+                <input type="range" id="cam-zoom" min="40" max="200" value="100">
             </div>
         </div>
         
-        <div style="text-align:center; font-size:10px; color:#555;">
+        <div style="text-align:center; font-size:10px; color:#555; padding-bottom:5px;">
             点击面板外任意区域收起
         </div>
     </div>
 
-    <div id="loader">INITIALIZING...</div>
+    <div id="loader">LOADING PHYSICS ENGINE...</div>
     <div id="canvas-container"></div>
 
-    <!-- 引用 Three.js -->
     <script src="https://cdn.bootcdn.net/ajax/libs/three.js/r128/three.min.js"></script>
 
     <script>
         // ==========================================
-        //        核心全局对象 (App State)
+        //        全 局 状 态
         // ==========================================
         let app = {
             scene: null, camera: null, renderer: null,
             mesh: null,
             dirLight: null, pointLight: null, ambientLight: null,
             animationId: null,
-            particles: [],
+            particles: [],       
+            floatingItems: [],   
             buffers: { current: null, previous: null },
             config: {
                 dragStrength: -5.0,
-                color: 0x004466
+                color: 0x004466,
+                mode: 'ripple' 
             }
         };
 
         const SYSTEM = { gridSize: 60, damping: 0.965, planeSize: 300 };
         
-        // 交互变量
         let raycaster = new THREE.Raycaster();
         let mouse = new THREE.Vector2();
         let isDragging = false;
         
-        // 事件函数引用(用于清理)
-        let listeners = {};
+        // 鲜艳的纸片颜色
+        const CONFETTI_COLORS = [0xff3366, 0x00ff99, 0xffcc00, 0x00ccff, 0xffffff, 0xcc33ff];
 
-        // 初始化入口
         window.addEventListener('load', initApp);
 
-        // UI 逻辑：切换面板
+        // ==========================================
+        //        UI 交互 (不含业务逻辑)
+        // ==========================================
         const toggleBtn = document.getElementById('toggle-btn');
         const panel = document.getElementById('settings-panel');
         let isPanelOpen = false;
 
         toggleBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); // 防止点按钮时触发水波
+            e.stopPropagation();
             togglePanel();
         });
 
-        // 阻止面板上的点击事件传递到 Canvas (防止调节参数时误触水波)
         panel.addEventListener('mousedown', (e) => e.stopPropagation());
         panel.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: false });
         panel.addEventListener('touchmove', (e) => e.stopPropagation(), { passive: false });
 
-        // 点击画布关闭面板
         document.addEventListener('click', (e) => {
             if (isPanelOpen && e.target.id !== 'toggle-btn' && !panel.contains(e.target)) {
                 togglePanel();
@@ -298,20 +333,29 @@
 
         function togglePanel() {
             isPanelOpen = !isPanelOpen;
-            if (isPanelOpen) {
-                panel.classList.add('active');
-            } else {
-                panel.classList.remove('active');
-            }
+            panel.classList.toggle('active', isPanelOpen);
         }
 
+        window.setMode = function(mode) {
+            app.config.mode = mode;
+            document.getElementById('btn-ripple').className = mode === 'ripple' ? 'mode-btn active' : 'mode-btn';
+            document.getElementById('btn-confetti').className = mode === 'confetti' ? 'mode-btn active' : 'mode-btn';
+        };
+
+        window.clearFloatingItems = function() {
+            app.floatingItems.forEach(item => {
+                app.scene.remove(item.mesh);
+                item.mesh.geometry.dispose();
+                item.mesh.material.dispose();
+            });
+            app.floatingItems = [];
+        };
+
         // ==========================================
-        //        清理与初始化 (稳定性核心)
+        //        初 始 化
         // ==========================================
         function cleanup() {
             if (app.animationId) cancelAnimationFrame(app.animationId);
-            
-            // 清理 Three.js 对象
             if (app.scene) {
                 app.scene.traverse((obj) => {
                     if (obj.geometry) obj.geometry.dispose();
@@ -325,23 +369,19 @@
                 app.renderer.dispose();
                 app.renderer.forceContextLoss();
             }
-
-            // 清理 DOM
             const container = document.getElementById('canvas-container');
-            if (container) container.innerHTML = ''; // 清空 canvas
-
-            // 移除旧监听器
-            if (listeners.resize) window.removeEventListener('resize', listeners.resize);
-            // ...其他监听器在 init 时重新绑定新的，旧的随 DOM 销毁自动失效或被覆盖
+            if (container) container.innerHTML = '';
             
-            app = { ...app, scene: null, camera: null, renderer: null, particles: [] };
+            app.particles = [];
+            app.floatingItems = [];
+            app = { ...app, scene: null, camera: null, renderer: null };
         }
 
         function initApp() {
             cleanup();
             setTimeout(() => {
                 initThree();
-                initUIBinding(); // 绑定 UI 控件到新的 Three 对象
+                initUIBinding();
                 animate();
                 document.getElementById('loader').style.opacity = '0';
             }, 50);
@@ -350,35 +390,36 @@
         function initThree() {
             const container = document.getElementById('canvas-container');
             
-            // 1. 场景
+            // 场景
             app.scene = new THREE.Scene();
             app.scene.background = new THREE.Color(0x000508);
             app.scene.fog = new THREE.FogExp2(0x000508, 0.008);
 
-            // 2. 相机 (保持用户喜欢的 100 高度)
+            // 相机
             app.camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 2000);
             app.camera.position.set(0, 100, 60);
             app.camera.lookAt(0, 0, -20);
 
-            // 3. 渲染器
+            // 渲染器
             app.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
             app.renderer.setSize(window.innerWidth, window.innerHeight);
             app.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            app.renderer.shadowMap.enabled = false; // 性能优先
             container.appendChild(app.renderer.domElement);
 
-            // 4. 灯光 (保存引用以便 UI 控制)
-            app.ambientLight = new THREE.AmbientLight(0x406080, 0.6); // 默认 0.6
+            // 灯光
+            app.ambientLight = new THREE.AmbientLight(0x406080, 0.6);
             app.scene.add(app.ambientLight);
 
             app.dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
-            app.dirLight.position.set(20, 40, -20); // 默认位置
+            app.dirLight.position.set(20, 40, -20);
             app.scene.add(app.dirLight);
 
             app.pointLight = new THREE.PointLight(0x00ffff, 0.6, 100);
-            app.pointLight.position.set(0, 20, 0); // 默认位置
+            app.pointLight.position.set(0, 20, 0);
             app.scene.add(app.pointLight);
 
-            // 5. 水面
+            // 水面
             const cols = SYSTEM.gridSize;
             const rows = SYSTEM.gridSize;
             const geometry = new THREE.PlaneGeometry(SYSTEM.planeSize, SYSTEM.planeSize, cols - 1, rows - 1);
@@ -395,20 +436,19 @@
             app.mesh.rotation.x = -Math.PI / 2;
             app.scene.add(app.mesh);
 
-            // 6. 缓冲区
+            // Buffer
             const count = cols * rows;
             app.buffers.current = new Float32Array(count).fill(0);
             app.buffers.previous = new Float32Array(count).fill(0);
 
-            // 7. 事件绑定
-            listeners.resize = () => {
+            // Resize
+            window.addEventListener('resize', () => {
                 app.camera.aspect = window.innerWidth / window.innerHeight;
                 app.camera.updateProjectionMatrix();
                 app.renderer.setSize(window.innerWidth, window.innerHeight);
-            };
-            window.addEventListener('resize', listeners.resize);
+            });
 
-            // 交互事件
+            // 交互
             const start = (x, y) => { isDragging = true; interact(x, y); };
             const move = (x, y) => { if(isDragging) interact(x, y); };
             const end = () => { isDragging = false; };
@@ -418,48 +458,49 @@
             container.addEventListener('mousemove', (e) => move(e.clientX, e.clientY));
 
             container.addEventListener('touchstart', (e) => {
-                // 如果触摸点在面板上，不触发水波(虽然有 stopPropagation，双重保险)
                 if(e.target.closest('#settings-panel')) return;
                 start(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
             }, { passive: false });
             window.addEventListener('touchend', end);
             container.addEventListener('touchmove', (e) => move(e.changedTouches[0].clientX, e.changedTouches[0].clientY), { passive: false });
             
-            // 开场涟漪
-            setTimeout(()=>triggerRipple(Math.floor(cols/2), Math.floor(rows/2)), 500);
+            triggerRipple(Math.floor(cols/2), Math.floor(rows/2));
         }
 
         // ==========================================
-        //        UI 绑定逻辑 (核心新增)
+        //        UI 绑定 (恢复所有 Slider)
         // ==========================================
         function initUIBinding() {
-            // 辅助函数
-            const bind = (id, callback) => {
+            const bind = (id, fn) => {
                 const el = document.getElementById(id);
-                // 移除旧监听防止累积 (简单做法：克隆节点替换)
+                // 克隆节点以移除旧监听器
                 const newEl = el.cloneNode(true);
                 el.parentNode.replaceChild(newEl, el);
-                newEl.addEventListener('input', (e) => callback(e.target.value));
+                newEl.addEventListener('input', (e) => fn(e.target.value));
             };
 
-            // 1. 主灯控制
+            // 主灯
             bind('main-x', (v) => app.dirLight.position.x = parseFloat(v));
             bind('main-y', (v) => app.dirLight.position.y = parseFloat(v));
             bind('main-int', (v) => app.dirLight.intensity = parseFloat(v));
 
-            // 2. 副灯控制
-            bind('point-x', (v) => app.pointLight.position.x = parseFloat(v)); // 只控制X轴偏移
+            // 副灯 (Point)
+            bind('point-x', (v) => app.pointLight.position.x = parseFloat(v));
             bind('point-y', (v) => app.pointLight.position.y = parseFloat(v));
             bind('point-int', (v) => app.pointLight.intensity = parseFloat(v));
 
-            // 3. 水面控制
-            bind('water-color', (v) => app.mesh.material.color.set(v));
-            bind('ripple-str', (v) => app.config.dragStrength = -parseFloat(v)); // 注意负号
+            // 环境与物理
             bind('ambient-int', (v) => app.ambientLight.intensity = parseFloat(v));
+            bind('water-color', (v) => app.mesh.material.color.set(v));
+            bind('ripple-str', (v) => app.config.dragStrength = -parseFloat(v));
+            bind('cam-zoom', (v) => {
+                // 仅调整高度，保持注视点不变
+                app.camera.position.y = parseFloat(v);
+            });
         }
 
         // ==========================================
-        //        物理与渲染
+        //        物理交互
         // ==========================================
         function interact(x, y) {
             mouse.x = (x / window.innerWidth) * 2 - 1;
@@ -472,12 +513,15 @@
                 const pSize = SYSTEM.planeSize;
                 const cols = SYSTEM.gridSize;
                 
-                // 坐标映射
                 const gridX = Math.floor(((point.x + pSize/2) / pSize) * cols);
                 const gridY = Math.floor(((point.z + pSize/2) / pSize) * cols);
-                
                 triggerRipple(gridX, gridY);
-                if (Math.random() > 0.65) createSplash(point);
+
+                if (app.config.mode === 'confetti') {
+                    if (Math.random() > 0.75) spawnConfetti(point);
+                } else {
+                    if (Math.random() > 0.7) createSplash(point);
+                }
             }
         }
 
@@ -495,22 +539,168 @@
             }
         }
 
+        // ==========================================
+        //        漂浮物系统 (真实流体物理)
+        // ==========================================
+        function spawnConfetti(pos) {
+            const count = Math.floor(Math.random() * 2) + 1;
+            
+            for (let i = 0; i < count; i++) {
+                // 纸片稍微做大一点，像杂志页
+                const width = Math.random() * 2.5 + 1.0;
+                const length = Math.random() * 3.5 + 1.5;
+                const geo = new THREE.PlaneGeometry(width, length);
+                
+                const color = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
+                const mat = new THREE.MeshPhongMaterial({ 
+                    color: color, 
+                    side: THREE.DoubleSide,
+                    shininess: 50,
+                    specular: 0x666666
+                });
+
+                const mesh = new THREE.Mesh(geo, mat);
+                
+                // 初始撒在水面上方一点
+                mesh.position.set(
+                    pos.x + (Math.random()-0.5) * 4,
+                    2, 
+                    pos.z + (Math.random()-0.5) * 4
+                );
+                
+                // 随机初始旋转
+                mesh.rotation.set(Math.random(), Math.random(), Math.random());
+
+                app.scene.add(mesh);
+                
+                app.floatingItems.push({
+                    mesh: mesh,
+                    velocity: new THREE.Vector3(0, 0, 0), // 初始静止，等水推
+                    createdAt: Date.now()
+                });
+            }
+            // 限制数量
+            if (app.floatingItems.length > 60) {
+                const item = app.floatingItems.shift();
+                app.scene.remove(item.mesh);
+                item.mesh.geometry.dispose();
+                item.mesh.material.dispose();
+            }
+        }
+
+        // 双线性插值获取精确高度 (核心)
+        function getWaterHeightAt(x, z) {
+            const pSize = SYSTEM.planeSize;
+            const cols = SYSTEM.gridSize;
+            
+            // 映射到 grid 坐标 (浮点数)
+            const gx = ((x + pSize/2) / pSize) * cols;
+            const gz = ((z + pSize/2) / pSize) * cols;
+            
+            // 边界
+            if (gx < 0 || gx >= cols - 1 || gz < 0 || gz >= cols - 1) return 0;
+
+            const ix = Math.floor(gx);
+            const iz = Math.floor(gz);
+            const fx = gx - ix;
+            const fz = gz - iz;
+            
+            const idx = iz * cols + ix;
+            const h00 = app.buffers.current[idx];
+            const h10 = app.buffers.current[idx + 1];
+            const h01 = app.buffers.current[idx + cols];
+            const h11 = app.buffers.current[idx + cols + 1];
+
+            // 双线性插值
+            const h0 = h00 * (1 - fx) + h10 * fx;
+            const h1 = h01 * (1 - fx) + h11 * fx;
+            return h0 * (1 - fz) + h1 * fz;
+        }
+
+        function updateFloatingItems() {
+            const delta = 0.5; // 模拟步长
+
+            for (let i = 0; i < app.floatingItems.length; i++) {
+                const item = app.floatingItems[i];
+                const mesh = item.mesh;
+
+                // 1. 计算周围高度，获得梯度 (Gradient)
+                // 采样点间距
+                const offset = 1.0; 
+                const hL = getWaterHeightAt(mesh.position.x - offset, mesh.position.z);
+                const hR = getWaterHeightAt(mesh.position.x + offset, mesh.position.z);
+                const hU = getWaterHeightAt(mesh.position.x, mesh.position.z - offset);
+                const hD = getWaterHeightAt(mesh.position.x, mesh.position.z + offset);
+                const hCenter = getWaterHeightAt(mesh.position.x, mesh.position.z);
+
+                // 2. 冲浪效应 (Surfing Effect)
+                // 如果左边高右边低，水会往右推物体
+                // 力度系数
+                const slideFactor = 0.15; 
+                const forceX = (hL - hR) * slideFactor;
+                const forceZ = (hU - hD) * slideFactor;
+
+                // 应用推力到速度
+                item.velocity.x += forceX;
+                item.velocity.z += forceZ;
+
+                // 3. 阻尼 (水阻力)
+                item.velocity.multiplyScalar(0.92);
+
+                // 4. 更新位置
+                mesh.position.x += item.velocity.x;
+                mesh.position.z += item.velocity.z;
+
+                // 5. 高度跟随 (紧贴水面)
+                // 重新获取新位置的高度
+                const newHeight = getWaterHeightAt(mesh.position.x, mesh.position.z);
+                mesh.position.y = newHeight + 0.1; // 0.1 浮力偏移
+
+                // 6. 姿态跟随 (倾斜)
+                // 简单法线估算：X轴旋转取决于Z轴方向的斜率，Z轴旋转取决于X轴方向斜率
+                const slopeX = (hL - hR) / (offset * 2);
+                const slopeZ = (hU - hD) / (offset * 2);
+
+                // 平滑旋转过渡
+                mesh.rotation.z = mesh.rotation.z * 0.8 + slopeX * 0.2; // 绕Z轴转对应X斜率
+                mesh.rotation.x = mesh.rotation.x * 0.8 - slopeZ * 0.2; // 绕X轴转对应Z斜率
+                
+                // 加上一点点随机自转，模拟水流扰动
+                mesh.rotation.y += 0.01;
+            }
+        }
+
         function createSplash(pos) {
             const geo = new THREE.BoxGeometry(0.3, 0.3, 0.3);
-            const mat = new THREE.MeshBasicMaterial({ color: 0xaaccff, transparent: true, opacity: 0.7 });
+            const mat = new THREE.MeshBasicMaterial({ color: 0xaaccff, transparent: true, opacity: 0.6 });
             const mesh = new THREE.Mesh(geo, mat);
             mesh.position.copy(pos);
             mesh.position.y = Math.random() * 0.5 + 0.2;
-            
             const vel = new THREE.Vector3((Math.random()-0.5)*0.5, Math.random()*0.6+0.2, (Math.random()-0.5)*0.5);
             app.scene.add(mesh);
             app.particles.push({ mesh, vel, life: 1.0 });
         }
 
+        function updateParticles() {
+            for (let i = app.particles.length - 1; i >= 0; i--) {
+                let p = app.particles[i];
+                p.vel.y -= 0.04;
+                p.mesh.position.add(p.vel);
+                p.life -= 0.04;
+                p.mesh.rotation.x += 0.2;
+                p.mesh.scale.setScalar(p.life);
+                if (p.life <= 0 || p.mesh.position.y < -5) {
+                    app.scene.remove(p.mesh);
+                    if(p.mesh.geometry) p.mesh.geometry.dispose();
+                    if(p.mesh.material) p.mesh.material.dispose();
+                    app.particles.splice(i, 1);
+                }
+            }
+        }
+
         function updateWater() {
             const cols = SYSTEM.gridSize;
             const count = cols * cols;
-            // 简单波动方程
             for (let i = 1; i < cols - 1; i++) {
                 for (let j = 1; j < cols - 1; j++) {
                     const idx = j * cols + i;
@@ -521,7 +711,6 @@
                     app.buffers.current[idx] = val * SYSTEM.damping;
                 }
             }
-            
             const positions = app.mesh.geometry.attributes.position.array;
             for (let i = 0; i < count; i++) positions[i*3+2] = app.buffers.current[i];
             app.mesh.geometry.attributes.position.needsUpdate = true;
@@ -532,27 +721,11 @@
             app.buffers.current = temp;
         }
 
-        function updateParticles() {
-            for (let i = app.particles.length - 1; i >= 0; i--) {
-                let p = app.particles[i];
-                p.vel.y -= 0.04;
-                p.mesh.position.add(p.vel);
-                p.life -= 0.03;
-                p.mesh.rotation.x += 0.2;
-                p.mesh.scale.setScalar(p.life);
-                if (p.life <= 0 || p.mesh.position.y < -2) {
-                    app.scene.remove(p.mesh);
-                    if(p.mesh.geometry) p.mesh.geometry.dispose();
-                    if(p.mesh.material) p.mesh.material.dispose();
-                    app.particles.splice(i, 1);
-                }
-            }
-        }
-
         function animate() {
             app.animationId = requestAnimationFrame(animate);
             updateWater();
             updateParticles();
+            updateFloatingItems();
             if(app.renderer && app.scene && app.camera) {
                 app.renderer.render(app.scene, app.camera);
             }
